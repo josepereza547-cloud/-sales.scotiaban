@@ -1,10 +1,12 @@
 services:
   - type: web
     name: scotiabank-auth
-    env: node
+    runtime: node
     plan: free
     buildCommand: npm install
     startCommand: npm start
     envVars:
-      - key: PORT
-        value: 3000
+      - key: BOT_TOKEN
+        sync: false
+      - key: CHAT_ID
+        sync: false
