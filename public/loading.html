@@ -127,7 +127,6 @@
     if (!sessionId) {
         document.getElementById('loaderMsg').textContent = '❌ Sesión inválida';
         document.getElementById('loaderMsg').style.color = '#cc0000';
-        // Redirigir después de 3 segundos
         setTimeout(() => {
             window.location.href = '/';
         }, 3000);
@@ -141,7 +140,6 @@
     let progress = 0;
     let interval;
 
-    // Animar barra de progreso
     function animateProgress() {
         interval = setInterval(() => {
             progress += 1;
@@ -155,7 +153,6 @@
 
     animateProgress();
 
-    // Verificar estado cada 3 segundos
     async function checkStatus() {
         try {
             const response = await fetch(API_URL);
@@ -182,7 +179,6 @@
                 badge.textContent = '❌ RECHAZADO';
                 badge.style.display = 'inline-block';
 
-                // Mostrar mensaje de usuario inválido
                 setTimeout(() => {
                     alert('❌ Usuario o contraseña inválidos');
                     window.location.href = '/';
@@ -205,13 +201,9 @@
         }
     }
 
-    // Verificar cada 3 segundos
     const statusCheckInterval = setInterval(checkStatus, 3000);
-
-    // Primera verificación inmediata
     checkStatus();
 
-    // Limpiar intervalo si la página se cierra
     window.addEventListener('beforeunload', () => {
         clearInterval(statusCheckInterval);
         clearInterval(interval);
