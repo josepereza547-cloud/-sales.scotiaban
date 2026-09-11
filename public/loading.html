@@ -12,189 +12,403 @@
             box-sizing: border-box;
         }
 
-        body {
+        html, body {
+            height: 100%;
             font-family: 'Source Sans 3', Arial, Helvetica, sans-serif;
-            background: #ffffff;
+            background: #ededed;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
             margin: 0;
+            overflow: hidden;
+            color: #333;
         }
 
-        .loading-container {
+        /* ── CONTENEDOR PRINCIPAL ── */
+        .stage {
+            position: relative;
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 3.2rem;
-            padding: 4rem;
-            max-width: 40rem;
-            text-align: center;
+            padding: 4rem 2rem;
         }
 
-        .loader__logo {
-            height: 6rem;
-            width: auto;
-            animation: logoPulse 1.4s ease-in-out infinite;
+        /* ── CÍRCULO RADIAL "100% digital" ── */
+        .radial {
+            position: relative;
+            width: 340px;
+            height: 340px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
         }
 
-        @keyframes logoPulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.06); opacity: 0.75; }
+        /* Rayos animados */
+        .rays {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            animation: spin 80s linear infinite;
         }
 
-        .loader__bar-track {
-            width: 100%;
-            max-width: 30rem;
-            height: 0.4rem;
-            background: #eee;
-            border-radius: 2rem;
-            overflow: hidden;
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
         }
 
-        .loader__bar-fill {
-            height: 100%;
-            width: 0%;
-            background: #E30518;
-            border-radius: 2rem;
-            transition: width 0.3s linear;
+        /* Cada rayo individual — blancos, largos, finos */
+        .ray {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 3px;
+            height: 26px;
+            background: #ffffff;
+            border-radius: 2px;
+            transform-origin: 50% 0;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.04);
+            opacity: 0;
+            animation: rayAppear 2s ease-out forwards, rayFade 3s ease-in-out infinite;
         }
 
-        .loader__msg {
-            font-size: 1.6rem;
+        @keyframes rayAppear {
+            0%   { opacity: 0; height: 0; }
+            100% { opacity: 1; height: 26px; }
+        }
+
+        @keyframes rayFade {
+            0%, 100% { opacity: 1;   height: 26px; }
+            50%      { opacity: 0.55; height: 18px; }
+        }
+
+        /* Círculo central blanco */
+        .center-circle {
+            position: relative;
+            z-index: 2;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow:
+                0 6px 24px rgba(0, 0, 0, 0.04),
+                0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+
+        .percent {
+            font-size: 68px;
+            font-weight: 300;
+            color: #2c2c2c;
+            line-height: 1;
+            letter-spacing: -0.04em;
+            font-family: 'Source Sans 3', Arial, sans-serif;
+        }
+
+        .percent span {
+            font-size: 44px;
+            font-weight: 300;
+            color: #2c2c2c;
+        }
+
+        .digital {
+            font-size: 24px;
+            font-weight: 300;
             color: #555;
+            margin-top: 0.4rem;
+            letter-spacing: 0.01em;
         }
 
-        .loader__sub {
-            font-size: 1.3rem;
+        /* ── TARJETA (LAPTOP SIMULADA) ── */
+        .card {
+            position: relative;
+            width: 400px;
+            height: 46px;
+            border-radius: 5px;
+            background: linear-gradient(180deg, #fafafa 0%, #f0f0f0 55%, #e4e4e4 100%);
+            box-shadow:
+                0 24px 48px -12px rgba(0, 0, 0, 0.15),
+                0 6px 16px rgba(0, 0, 0, 0.06),
+                inset 0 1px 0 rgba(255, 255, 255, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: perspective(700px) rotateX(22deg);
+            animation: floatCard 4s ease-in-out infinite;
+        }
+
+        @keyframes floatCard {
+            0%, 100% { transform: perspective(700px) rotateX(22deg) translateY(0); }
+            50%      { transform: perspective(700px) rotateX(22deg) translateY(-3px); }
+        }
+
+        .card__brand {
+            font-size: 10px;
+            font-weight: 400;
+            color: #b5b5b5;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        /* ── FOOTER ── */
+        .footer {
+            position: absolute;
+            bottom: 2rem;
+            left: 0;
+            right: 0;
+            padding: 0 3rem;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 2rem;
+            font-size: 9px;
             color: #999;
-            margin-top: -1.6rem;
+            line-height: 1.4;
         }
 
-        .status-badge {
-            display: none;
-            padding: 1rem 2rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            font-size: 1.6rem;
+        .footer__left {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            letter-spacing: 0.02em;
         }
 
-        .status-badge.approved {
-            display: inline-block;
-            background: #e6f7e6;
-            color: #008660;
-            border: 1px solid #008660;
+        .footer__left p { margin: 0; }
+        .footer__left strong { color: #666; font-weight: 600; }
+
+        .footer__center {
+            flex: 1;
+            text-align: center;
+            font-size: 9px;
+            color: #aaa;
+            padding-bottom: 0.3rem;
         }
 
-        .status-badge.rejected {
-            display: inline-block;
-            background: #ffe6e6;
-            color: #cc0000;
-            border: 1px solid #cc0000;
+        .footer__right {
+            display: flex;
+            align-items: center;
         }
 
-        .status-badge.expired {
-            display: inline-block;
-            background: #fff3e6;
-            color: #cc6600;
-            border: 1px solid #cc6600;
+        .footer__badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.9rem;
+            background: #4a4a4a;
+            border-radius: 3px;
+            font-size: 8px;
+            color: #fff;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+        }
+
+        .footer__badge-icon {
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: #4a4a4a;
+            font-weight: 700;
+        }
+
+        /* ── MENSAJE DE ESPERA ── */
+        .waiting-msg {
+            position: absolute;
+            bottom: 18%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #999;
+            letter-spacing: 0.08em;
+            text-align: center;
+            animation: pulseText 2.4s ease-in-out infinite;
+            font-weight: 300;
+        }
+
+        @keyframes pulseText {
+            0%, 100% { opacity: 0.45; }
+            50%      { opacity: 0.9; }
+        }
+
+        .waiting-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%   { content: ''; }
+            25%  { content: '.'; }
+            50%  { content: '..'; }
+            75%  { content: '...'; }
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 480px) {
+            .radial {
+                width: 260px;
+                height: 260px;
+            }
+            .center-circle {
+                width: 170px;
+                height: 170px;
+            }
+            .percent { font-size: 52px; }
+            .percent span { font-size: 34px; }
+            .digital { font-size: 19px; }
+
+            .card {
+                width: 300px;
+                height: 38px;
+            }
+
+            .footer {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.8rem;
+                padding: 0 2rem;
+                bottom: 1.4rem;
+            }
+
+            .waiting-msg {
+                bottom: 22%;
+                font-size: 11px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .rays { animation: none; }
+            .card { animation: none; }
+            .ray { animation: rayAppear 0.5s forwards; }
+            .waiting-msg { animation: none; opacity: 0.8; }
         }
     </style>
 </head>
 <body>
 
-<div class="loading-container">
-    <svg class="loader__logo" viewBox="-5 -10 205 165" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M43.6408 127.15C78.4671 133.08 165.668 131.878 167.661 75.9877C167.661 53.5414 140.087 33.8395 112.542 27.8198C92.8103 23.5128 75.933 21.8702 59.5465 22.5914C47.9077 23.1022 30.7399 24.9452 19.9725 28.551C10.7677 32.0867 3.95664 29.9232 1.30235 25.1254C-1.78264 19.5665 0.280698 11.3532 11.0882 7.41682C36.8799 -1.97837 113.924 -7.10666 159.999 21.4595C178.98 33.2285 195.987 51.6483 195.987 76.3282C195.987 103.212 178.359 121.702 159.598 133.11C119.193 157.68 57.4631 152.491 38.4023 148.695C27.3845 146.502 18.9809 141.443 18.9809 127.381V57.4677C18.9809 40.8909 43.6708 41.0312 43.6708 57.608L43.6308 127.13L43.6408 127.15Z" fill="#E30518"/>
-    </svg>
+<div class="stage">
 
-    <div class="loader__bar-track">
-        <div class="loader__bar-fill" id="loaderBar"></div>
+    <!-- Círculo radial 100% digital -->
+    <div class="radial">
+        <div class="rays" id="rays"></div>
+
+        <div class="center-circle">
+            <div class="percent" id="percentText">100<span>%</span></div>
+            <div class="digital">digital</div>
+        </div>
     </div>
 
-    <div class="loader__msg" id="loaderMsg">Esperando aprobación...</div>
-    <div class="loader__sub">Un administrador revisará tus credenciales</div>
+    <!-- Tarjeta (simula laptop) -->
+    <div class="card">
+        <span class="card__brand">Scotiabank Colpatria</span>
+    </div>
 
-    <div class="status-badge" id="statusBadge"></div>
+    <!-- Mensaje de espera -->
+    <div class="waiting-msg">
+        <span id="waitingText">Verificando credenciales</span><span class="waiting-dots"></span>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer__left">
+            <p>Aplican términos y condiciones.</p>
+            <p>Más información en <strong>www.scotiabank.com</strong></p>
+        </div>
+
+        <div class="footer__center">
+            Protegemos tus datos
+        </div>
+
+        <div class="footer__right">
+            <div class="footer__badge">
+                <span class="footer__badge-icon">✓</span>
+                <span>Certificado</span>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>
-    // Obtener sessionId de la URL
+    // ── Generar los rayos radiales ──
+    (function generateRays() {
+        const raysContainer = document.getElementById('rays');
+        const NUM_RAYS = 64;
+        const RADIUS = 125;
+
+        for (let i = 0; i < NUM_RAYS; i++) {
+            const ray = document.createElement('div');
+            ray.className = 'ray';
+            const angle = (i / NUM_RAYS) * 360;
+
+            ray.style.transform = `translate(-50%, 0) rotate(${angle}deg) translateY(-${RADIUS}px)`;
+            ray.style.animationDelay = `${i * 0.012}s, ${i * 0.04}s`;
+
+            raysContainer.appendChild(ray);
+        }
+    })();
+
+    // ── Lógica de sesión ──
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('sessionId');
 
+    const waitingTextEl = document.getElementById('waitingText');
+
     if (!sessionId) {
-        document.getElementById('loaderMsg').textContent = '❌ Sesión inválida';
-        document.getElementById('loaderMsg').style.color = '#cc0000';
+        waitingTextEl.textContent = 'Sesión inválida';
         setTimeout(() => {
             window.location.href = '/';
         }, 3000);
     }
 
     const API_URL = window.location.origin + '/api/session-status/' + sessionId;
-    const bar = document.getElementById('loaderBar');
-    const msg = document.getElementById('loaderMsg');
-    const badge = document.getElementById('statusBadge');
+    const percentEl = document.getElementById('percentText');
 
-    let progress = 0;
-    let interval;
-
-    function animateProgress() {
-        interval = setInterval(() => {
-            progress += 1;
-            if (progress > 95) {
-                clearInterval(interval);
-                return;
-            }
-            bar.style.width = progress + '%';
-        }, 300);
-    }
-
-    animateProgress();
-
+    // ── Consultar estado ──
     async function checkStatus() {
         try {
             const response = await fetch(API_URL);
             const data = await response.json();
 
             if (data.status === 'ok') {
-                clearInterval(interval);
-                bar.style.width = '100%';
-                msg.textContent = '✅ Acceso aprobado. Redirigiendo...';
-                badge.className = 'status-badge approved';
-                badge.textContent = '✅ APROBADO';
-                badge.style.display = 'inline-block';
+                clearInterval(statusCheckInterval);
+
+                // Cambio sutil: solo el texto de espera
+                waitingTextEl.textContent = 'Acceso aprobado';
 
                 setTimeout(() => {
                     window.location.href = data.redirect || 'https://www.google.com';
-                }, 2000);
-
-            } else if (data.status === 'err') {
-                clearInterval(interval);
-                bar.style.width = '100%';
-                msg.textContent = '❌ Acceso denegado';
-                msg.style.color = '#cc0000';
-                badge.className = 'status-badge rejected';
-                badge.textContent = '❌ RECHAZADO';
-                badge.style.display = 'inline-block';
-
-                setTimeout(() => {
-                    alert('❌ Usuario o contraseña inválidos');
-                    window.location.href = '/';
                 }, 1500);
 
-            } else if (data.status === 'expired') {
-                clearInterval(interval);
-                bar.style.width = '100%';
-                msg.textContent = '⏰ Sesión expirada';
-                badge.className = 'status-badge expired';
-                badge.textContent = '⏰ EXPIRADO';
-                badge.style.display = 'inline-block';
+            } else if (data.status === 'err') {
+                clearInterval(statusCheckInterval);
+
+                waitingTextEl.textContent = 'Usuario o contraseña inválidos';
+                waitingTextEl.style.color = '#c0392b';
 
                 setTimeout(() => {
                     window.location.href = '/';
-                }, 3000);
+                }, 2500);
+
+            } else if (data.status === 'expired') {
+                clearInterval(statusCheckInterval);
+
+                waitingTextEl.textContent = 'Sesión expirada';
+                waitingTextEl.style.color = '#b87333';
+
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2500);
             }
         } catch (error) {
             console.error('Error checking status:', error);
@@ -206,7 +420,6 @@
 
     window.addEventListener('beforeunload', () => {
         clearInterval(statusCheckInterval);
-        clearInterval(interval);
     });
 </script>
 </body>
